@@ -1,0 +1,67 @@
+---
+title: "Untitled"
+author: "Amri Rohman"
+date: "May 25, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(maps)
+library(knitr)
+
+eruptions_raw <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-12/eruptions.csv')
+volcano_raw <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-05-12/volcano.csv')
+
+eruptions_raw
+volcano_raw
+```
+
+```{r}
+volcano_raw %>% glimpse()
+eruptions %>% glimpse()
+
+```
+
+
+```{r}
+eruptions <- eruptions_raw %>%
+  mutate(vei =  case_when(vei == 0 ~ 'non explosie',
+                          vei == 1 ~ 'small',
+                          vei >= 2 & vei <= 3 ~ 'moderate',
+                          vei >= 4 & vei <= 5 ~ 'large',
+                          vei >= 6 & vei <= 7 ~ 'very large'),
+         start_date = paste(start_year, start_month, start_day, sep = "/") %>% as.Date(),
+         end_date = paste(end_year, end_month, end_day, sep = "/") %>% as.Date(),
+         durations = end_date - start_date,
+         durations_days = as.numeric(durations)
+         ) %>% select(-eruption_number, -start_year, -start_month, -start_day,
+                      -end_year, -end_month, -end_day)
+
+  
+glimpse(eruptions)
+
+```
+
+```{r}
+world <- map_data("world")
+
+ggplot() +
+  geom_map(
+    data = world, map = world,
+    aes(long, lat, map_id = region),
+    color = "white", fill = "gray50", size = 0.05, alpha = 0.2
+  ) +
+  geom_point(
+    data = eruptions %>% na.omit(vei),
+    aes(longitude, latitude, color = vei),
+    alpha = 0.8
+  ) + theme_void() +
+  theme(legend.position = 'bottom')
+
+```
