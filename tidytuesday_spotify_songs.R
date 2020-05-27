@@ -72,5 +72,12 @@ spotify_songs %>%
   theme_minimal() +
   theme(legend.position = 'bottom')
 
-spotify_songs %>% 
-  summary %>% view()
+spotify_songs %>%
+  na.omit(era) %>%
+  ggplot() +
+  geom_density(aes(duration_s, fill=playlist_genre)) +
+  facet_grid(era~playlist_genre) +
+  theme_minimal() +
+  theme(legend.position = 'bottom')
+
+

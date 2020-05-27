@@ -9,7 +9,7 @@ person who is able to understand data well.
 
 I have produced several analyzes which you can see below.
 
-  - [Spotify Song](https://rpubs.com/amrirohman/spotify-song)
+  - Spotify Song
 
 ### Thank You
 

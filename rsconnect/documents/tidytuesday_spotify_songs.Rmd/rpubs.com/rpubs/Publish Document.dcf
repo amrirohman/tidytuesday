@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/617616/5d82950dae184ff4b15c99cdc6e45645
+bundleId: https://api.rpubs.com/api/v1/document/617616/5d82950dae184ff4b15c99cdc6e45645
+url: http://rpubs.com/amrirohman/617616
+when: 1590122608.02042

@@ -12,10 +12,12 @@ knitr::opts_chunk$set(echo = TRUE,
                       warning = FALSE,
                       message = FALSE,
                       fig.width=10,
-                      fig.height=4)
+                      fig.height=3.5)
 options(scipen = 999,
-        digits=2) 
+        digits = 2) 
 ```
+![](https://images.unsplash.com/photo-1504509546545-e000b4a62425?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1350&q=80)
+
 # About Dataset
 ***
 
@@ -51,13 +53,13 @@ spotify_songs <- spotify_songs_raw %>%
     era = case_when(year <= 2000 ~ "under 00s era",
                     year > 2000 & year <= 2010 ~ "2010 era",
                     year > 2010 ~ "modern era"),
-    duration_s = duration_ms/60000) %>%
-  select(-track_id, -track_album_id, -playlist_id)
+    duration_min = duration_ms/60000) %>%
+  select(-track_id, -track_album_id, -playlist_id, -duration_ms)
 
 spotify_songs %>% 
-  select(track_name, track_artist, duration_s,
+  select(track_name, track_artist, duration_min,
          track_popularity, playlist_genre, 
-         tempo, era) %>%
+         tempo) %>%
   head() %>%
   kable()
 ```
@@ -96,7 +98,7 @@ spotify_songs %>%
 
 # Data Exploration
 ***
-### What song is the most popular?
+### What is the most popular song?
 
 ```{r}
 spotify_songs %>%
@@ -104,28 +106,29 @@ spotify_songs %>%
   arrange(-track_popularity) %>%
   distinct() %>%
   filter(track_popularity %in% c(97:100)) %>% 
-  knitr::kable()
+  kable()
 ```
 
-The first most popular song in Spotify is Dance Monkey	by Tones and I. Followed by ROXANNE	- Arizona Zervas and the others.
+The first most popular song in Spotify is Dance Monkey - Tones and I. Followed by ROXANNEArizona Zervas and the others.
 
-### How is the dominance of mode in every genre?
+### How is the dominance of mode/modality in every genre?
 
 ```{r}
 spotify_songs %>%
   group_by(mode, playlist_genre) %>%
   count(mode, sort = TRUE) %>%
   ggplot() +
-  geom_bar(aes(playlist_genre, n, fill=mode), position="fill", stat="identity") +
-  geom_hline(aes(yintercept=0.5)) +
-  coord_flip() +
+  geom_bar(aes(mode, n, fill=mode), stat="identity") +
   labs(x='Proportion', y='Playlist Genre') +
-  theme_minimal()
+  facet_wrap(~playlist_genre, nrow = 2)+
+  theme_minimal() +
+  theme(legend.position = 'bottom')
 ```
-Major mode is most often used in all genres on Spotify.
+Major mode/modality is most often used in all genres on Spotify.
 
-### How is the dominance of mode in every subgenre?
-```{r}
+### How is the dominance of mode/modality in every subgenre?
+
+```{r fig.height=4}
 spotify_songs %>%
   group_by(playlist_genre, mode) %>%
   count(playlist_subgenre) %>%
@@ -133,12 +136,13 @@ spotify_songs %>%
   geom_bar(aes(reorder(playlist_subgenre, n), n, fill=mode), position = 'stack', stat='identity') +
   coord_flip() +
   facet_wrap(playlist_genre~., scales="free", nrow=3) +
+  labs(x='Sub Genre', y='Count') +
   theme_minimal() +
   theme(legend.position = 'bottom')
 ```
-The sub genre of rock has the most dominant major modes than other sub genres. The sub genre of rap has a balanced mode relatively.
+The sub genre of rock has the most dominant major mode/modality than other sub genres. The sub genre of rap has a balanced mode/modality relatively.
 
-### Which track from the era is the most on Spotify?
+### Which song from the era is the most on Spotify?
 
 ```{r}
 spotify_songs %>%
@@ -150,35 +154,57 @@ spotify_songs %>%
   labs(x='Era', y='Count') +
   theme_minimal()
 ```
-Track from the modern era (released above in 2010) most in spotify.
+song from the modern era (released above in 2010) most in spotify.
 
-### How the distribution of tempo in each genre?
+### How about the tempo in each genre and Era?
 
 ```{r}
 spotify_songs %>%
   group_by(playlist_genre, era) %>%
   na.omit() %>%
   ggplot() +
-  geom_density(aes(tempo, fill=playlist_genre)) +
-  facet_grid(era~playlist_genre) +
+  geom_boxplot(aes(era, tempo, fill=era), outlier.size=0) +
+  facet_grid(~playlist_genre) + 
+  coord_flip() +
   labs(x='Tempo') +
   theme_minimal() +
   theme(legend.position = 'none')
 ```
-Rap songs in the under 00s era had a slower tempo compared to other eras.
+Rap song in the under 00s era had a slower tempo compared to other eras. EDM song has small variation about tempo in every era.
 
-### How the distribution of duration in each genre?
+### How the distribution of duration in each Genre and Era?
 
 ```{r}
 spotify_songs %>%
   na.omit(era) %>%
   ggplot() +
-  geom_density(aes(duration_s, fill=playlist_genre)) +
+  geom_density(aes(duration_min, fill=playlist_genre)) +
   facet_grid(era~playlist_genre) +
   theme_minimal() +
-  labs(x='Duration (sec)') +
+  labs(x='Duration (min)') +
   theme(legend.position = 'none')
 ```
-EDM track in the 2010 era has a relatively longer duration than in other eras. Rap track in the modern era has a relatively shorter duration than in other eras. While others have relatively the same duration in each era.
+EDM song in the 2010 era has a relatively longer duration than in other eras. Rap song in the modern era has a relatively shorter duration than in other eras. While others have relatively the same duration in each era.
+
+### How about audio Features in every genre?
+
+```{r}
+spotify_songs %>%
+    select(danceability, energy, -loudness, speechiness, acousticness, instrumentalness, liveness, valence,
+           playlist_genre,
+           -track_popularity, -key, -tempo, -year, -duration_min) %>% 
+  gather(key=status, value=value, -playlist_genre) %>%
+  ggplot() +
+  geom_bar(aes(status, value, fill=status), stat='identity') +
+  coord_flip() +
+  facet_wrap(~playlist_genre, nrow=2) +
+  theme_minimal() +
+  labs(x='Value') +
+  theme(legend.position = 'none')
+```
 
 
+
+# Thank You
+Amri Rohman. <br>
+Sidoarjo, East Java, ID
