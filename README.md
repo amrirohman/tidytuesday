@@ -1,6 +1,5 @@
 
 # Tidytuesday Analysis
-***
 
 Hi Everybody. Now, I’m doing data analysis in the Tidytuesday project.
 Tidytuesday is a weekly data project aimed at the R ecosystem. You can
@@ -12,7 +11,7 @@ I have produced several analyzes which you can see below.
 
   - [Spotify Song](https://rpubs.com/amrirohman/spotify-song)
   - [Volcano Eruptions](https://rpubs.com/amrirohman/volcano-explosion)
-  - Food Consumption and CO2 Emmission - SOON
+  - [Food Consumption and CO2 Emmission](https://rpubs.com/amrirohman/food-consumption)
   - Marble Races - SOON
   
 ### Thank You
